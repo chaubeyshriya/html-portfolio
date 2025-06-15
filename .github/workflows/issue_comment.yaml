@@ -8,12 +8,12 @@ jobs:
   comment-with-action:
     runs-on: ubuntu-latest
     steps:
-      - name: "Dump GitHub context"
+      - name: Dump GitHub context
         run: echo '${{ toJSON(github.event) }}' | jq
         shell: bash
 
       - name: Create comment
-        uses: peter-evans/create-or-update-comment@v1
+        uses: peter-evans/create-or-update-comment@v4
         with:
           issue-number: ${{ github.event.issue.number }}
           body: |
@@ -24,20 +24,15 @@ jobs:
             [1]: https://github.com/peter-evans/create-or-update-comment
           reactions: '+1'
 
-    comment-with-api:
-      -runs-on: ubuntu-latest
-      steps:
-        -name: Create a comment with API
-         run: |
-          gh api -X POST \
-           http://api.github.com/repo/${ORGANIZATION}/${REPOSITARY}/issues/${ISSUE_NUMBER/comment
-           -f body='
-           Comment but from the API call not action
-           '
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            ORGANIZATION: ${{ github.event.organisation.login }}
-            REPOSITORY: ${{ github.event.repository.name }}
-            ISSUE_NUMBER: ${{ github.event.issue.number }}
-           
-        
+  comment-with-api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create a comment with API
+        run: |
+          gh api -X POST /repos/${ORGANIZATION}/${REPOSITORY}/issues/${ISSUE_NUMBER}/comments \
+            -f body='Comment from the API call, not action'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ORGANIZATION: ${{ github.repository_owner }}
+          REPOSITORY: ${{ github.event.repository.name }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
